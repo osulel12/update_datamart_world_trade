@@ -161,3 +161,4 @@ cython_debug/
 sql_scripts.py
 *.json
 .flake8
+update_mart_world_trade_with_bot_message.py
