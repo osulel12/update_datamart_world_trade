@@ -49,12 +49,14 @@ class Update_world_trade_mart:
             if i not in dct['code_nan']:
                 dct['code_nan'].append(i)
 
-    def update_blank_datamart(self, sql_script: str, need_table: str, flag_truncate: bool = False) -> str:
+    def update_blank_datamart(self, sql_script: str, need_table: str, file_name: str,
+                              flag_truncate: bool = False) -> str:
         """
         Функция обновления промежуточной таблицы
         :param sql_script: sql скрипт, чтобы забрать данных из основной БД
         :param need_table: название промежуточной таблицы, которая будет очищена и в которую будет
                            вестись запись данных
+        :param file_name: имя сохраняемого файла с кодами
         :param flag_truncate: флаг для очисткитки/дозаписи в таблицу
         :return: строку с длительностью выполнения операции
         """
@@ -97,13 +99,14 @@ class Update_world_trade_mart:
                 except:
                     print('Данные не были загружены')
 
-        pd.DataFrame(self.dict_nan_tnved_code).to_excel('Отсутствующие коды.xlsx', index=False)
+        pd.DataFrame(self.dict_nan_tnved_code).to_excel(f'{file_name}.xlsx', index=False)
         end_full = datetime.now()
         return str(end_full - start_full)
 
     def update_main_datamart(self, name_bd: str, table_source: str, table_update: str) -> str:
         """
         Функция обновления основной таблицы для дашбордов
+        :param name_bd: имя базы данных
         :param table_source: название таблицы источника (наша промежуточная таблица)
         :param table_update: название основной таблицы (витрины)
         :return: строку с длительностью выполнения операции

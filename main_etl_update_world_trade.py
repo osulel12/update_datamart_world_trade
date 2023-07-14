@@ -31,11 +31,13 @@ def all_update_datamart():
     # Обновляем большую часть данных и делаем truncate резервной таблицы
     update_first_script = update_table_mart.update_blank_datamart(update_world_trade_mart_script,
                                                                   dict_name_table["table_source"],
+                                                                  'auto_sql_script',
                                                                   flag_truncate=True)
     print(f'Обновление авто заняло {update_first_script}')
     # Обновляем меньшую часть данных
     update_fish8_script = update_table_mart.update_blank_datamart(sql_sqript_fish_8,
                                                                   dict_name_table["table_source"],
+                                                                  'fish8_sql_sqript',
                                                                   flag_truncate=False)
     print(f'Обновление fish8 заняло {update_fish8_script}')
     # Обновляем витрину данных
