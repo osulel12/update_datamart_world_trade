@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import warnings
 import psycopg2
@@ -99,7 +101,9 @@ class Update_world_trade_mart:
                 except:
                     print('Данные не были загружены')
 
-        pd.DataFrame(self.dict_nan_tnved_code).to_excel(f'{file_name}.xlsx', index=False)
+        df_code_out = pd.DataFrame(self.dict_nan_tnved_code)
+        os.remove(f'{file_name}.xlsx') if df_code_out.shape[0] == 0 \
+            else df_code_out.to_excel(f'{file_name}.xlsx', index=False)
         end_full = datetime.now()
         return str(end_full - start_full)
 
