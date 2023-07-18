@@ -1,5 +1,4 @@
-import os
-
+from my_loggir import Loggir_for_datamart
 import pandas as pd
 import warnings
 import psycopg2
@@ -71,38 +70,43 @@ class Update_world_trade_mart:
         # Получаем датафрейм нарезанный на бакеты
         generator_df = pd.read_sql(sql_script, con=self.psycopg_connect, chunksize=100000)
 
+        # Логирование начала загрузки
+        Loggir_for_datamart(__name__).get_logging().info('Начало загрузки данных в ClicHouse')
         # Пробегаемся по датафрейму и обрабатываем каждый срез
         for chunk_df in generator_df:
-            flag_iter = True
+            try:
+                flag_iter = True
 
-            # Записываем коды, названия котрых пропущены
-            lst_code = chunk_df.loc[chunk_df.group_prod2.isna()].commodity_code.unique()
-            self.insert_dict(self.dict_nan_tnved_code, lst_code)
+                # Записываем коды, названия котрых пропущены
+                lst_code = chunk_df.loc[chunk_df.group_prod2.isna()].commodity_code.unique()
+                self.insert_dict(self.dict_nan_tnved_code, lst_code)
 
-            chunk_df['group_prod2'] = chunk_df['group_prod2'].fillna('Прочая продукция')
-            chunk_df['switch_mpt'] = chunk_df.commodity_code.apply(
-                lambda x: 'продукции АПК c кодами ТН ВЭД 01–24' if int(
-                    str(x)[:2]) < 25 else 'продукции АПК с кодами ТН ВЭД  выше 24-го')
-            chunk_df_for_load = chunk_df.groupby(
-                ['year', 'trade_flow', 'reporter_code', 'reporter', 'partner_code', 'partner', 'group_prod1',
-                 'group_prod2', 'source', 'mirror_columns', 'update_date', 'switch_mpt'], as_index=False)\
-                .agg({'trade_value': 'sum', 'netweight': 'sum'})
-            chunk_df_for_load['update_mart'] = datetime.now().now().strftime('%Y-%m-%d')
-            chunk_df_for_load['group_prod2'] = chunk_df_for_load.group_prod2.apply(
-                lambda x: x if x is None else x[:x.rfind('(') - 1])
-            chunk_df_for_load = chunk_df_for_load.astype({'update_mart': 'datetime64[ns]',
-                                                          'update_date': 'datetime64[ns]'})
+                chunk_df['group_prod2'] = chunk_df['group_prod2'].fillna('Прочая продукция')
+                chunk_df['switch_mpt'] = chunk_df.commodity_code.apply(
+                    lambda x: 'продукции АПК c кодами ТН ВЭД 01–24' if int(
+                        str(x)[:2]) < 25 else 'продукции АПК с кодами ТН ВЭД  выше 24-го')
+                chunk_df_for_load = chunk_df.groupby(
+                    ['year', 'trade_flow', 'reporter_code', 'reporter', 'partner_code', 'partner', 'group_prod1',
+                     'group_prod2', 'source', 'mirror_columns', 'update_date', 'switch_mpt'], as_index=False)\
+                    .agg({'trade_value': 'sum', 'netweight': 'sum'})
+                chunk_df_for_load['update_mart'] = datetime.now().now().strftime('%Y-%m-%d')
+                chunk_df_for_load['group_prod2'] = chunk_df_for_load.group_prod2.apply(
+                    lambda x: x if x is None else x[:x.rfind('(') - 1])
+                chunk_df_for_load = chunk_df_for_load.astype({'update_mart': 'datetime64[ns]',
+                                                              'update_date': 'datetime64[ns]'})
 
-            # Загрузка данных в промежуточную таблицу
-            while flag_iter:
-                try:
-                    self.click_house_client.insert_df(table=need_table, df=chunk_df_for_load)
-                    flag_iter = False
-                except:
-                    print('Данные не были загружены')
+                # Загрузка данных в промежуточную таблицу
+                while flag_iter:
+                    try:
+                        self.click_house_client.insert_df(table=need_table, df=chunk_df_for_load)
+                        flag_iter = False
+                    except Exception:
+                        Loggir_for_datamart(__name__).get_logging().exception('Ошибка при загрузке данных в ClicHouse')
+            except Exception:
+                Loggir_for_datamart(__name__).get_logging().exception('Неизвестна ошибка при обработки датафреймов')
 
         df_code_out = pd.DataFrame(self.dict_nan_tnved_code)
-        os.remove(f'{file_name}.xlsx') if df_code_out.shape[0] == 0 \
+        None if df_code_out.shape[0] == 0 \
             else df_code_out.to_excel(f'{file_name}.xlsx', index=False)
         end_full = datetime.now()
         return str(end_full - start_full)
