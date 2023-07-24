@@ -36,8 +36,6 @@ class Update_world_trade_mart:
                                                                 username=dct_cfg_ch['USER'],
                                                                 password=dct_cfg_ch['PASSWORD'],
                                                                 database=dct_cfg_ch['DATABASE'])
-        # Словарь содержащий коды, значения которых пропущены в group_prod2
-        self.dict_nan_tnved_code = {'code_nan': []}
 
     @staticmethod
     def insert_dict(dct: dict, lst_code: list):
@@ -70,6 +68,9 @@ class Update_world_trade_mart:
         # Получаем датафрейм нарезанный на бакеты
         generator_df = pd.read_sql(sql_script, con=self.psycopg_connect, chunksize=100000)
 
+        # Создаем словарь для валидации кодов, значения которых пропущены в group_prod2
+        dict_nan_tnved_code = {'code_nan': []}
+
         # Логирование начала загрузки
         Loggir_for_datamart(__name__).get_logging().info('Начало загрузки данных в ClicHouse')
         # Пробегаемся по датафрейму и обрабатываем каждый срез
@@ -79,7 +80,7 @@ class Update_world_trade_mart:
 
                 # Записываем коды, названия котрых пропущены
                 lst_code = chunk_df.loc[chunk_df.group_prod2.isna()].commodity_code.unique()
-                self.insert_dict(self.dict_nan_tnved_code, lst_code)
+                self.insert_dict(dict_nan_tnved_code, lst_code)
 
                 chunk_df['group_prod2'] = chunk_df['group_prod2'].fillna('Прочая продукция')
                 chunk_df['switch_mpt'] = chunk_df.commodity_code.apply(
@@ -105,7 +106,7 @@ class Update_world_trade_mart:
             except Exception:
                 Loggir_for_datamart(__name__).get_logging().exception('Неизвестна ошибка при обработки датафреймов')
 
-        df_code_out = pd.DataFrame(self.dict_nan_tnved_code)
+        df_code_out = pd.DataFrame(dict_nan_tnved_code)
         None if df_code_out.shape[0] == 0 \
             else df_code_out.to_excel(f'{file_name}.xlsx', index=False)
         end_full = datetime.now()
