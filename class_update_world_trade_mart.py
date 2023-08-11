@@ -92,7 +92,7 @@ class Update_world_trade_mart:
                     .agg({'trade_value': 'sum', 'netweight': 'sum'})
                 chunk_df_for_load['update_mart'] = datetime.now().now().strftime('%Y-%m-%d')
                 chunk_df_for_load['group_prod2'] = chunk_df_for_load.group_prod2.apply(
-                    lambda x: x if x is None else x[:x.rfind('(') - 1])
+                    lambda x: x if x is None or not set('()') <= set(x) else x[:x.rfind('(') - 1])
                 chunk_df_for_load = chunk_df_for_load.astype({'update_mart': 'datetime64[ns]',
                                                               'update_date': 'datetime64[ns]'})
 

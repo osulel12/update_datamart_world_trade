@@ -1,0 +1,9 @@
+class_update_world_trade_mart.py 2023-08-11 09:11 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 09:14 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 09:14 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 10:56 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 11:00 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 11:00 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 12:17 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 12:20 INFO Начало загрузки данных в ClicHouse
+class_update_world_trade_mart.py 2023-08-11 12:20 INFO Начало загрузки данных в ClicHouse
