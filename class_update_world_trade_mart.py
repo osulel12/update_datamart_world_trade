@@ -84,8 +84,8 @@ class Update_world_trade_mart:
 
                 chunk_df['group_prod2'] = chunk_df['group_prod2'].fillna('Прочая продукция')
                 chunk_df['switch_mpt'] = chunk_df.commodity_code.apply(
-                    lambda x: 'продукции АПК c кодами ТН ВЭД 01–24' if int(
-                        str(x)[:2]) < 25 else 'продукции АПК с кодами ТН ВЭД  выше 24-го')
+                    lambda x: 'продукция АПК c кодами ТН ВЭД 01–24' if int(
+                        str(x)[:2]) < 25 else 'продукция АПК с кодами ТН ВЭД  выше 24-го')
                 chunk_df_for_load = chunk_df.groupby(
                     ['year', 'trade_flow', 'reporter_code', 'reporter', 'partner_code', 'partner', 'group_prod1',
                      'group_prod2', 'source', 'mirror_columns', 'update_date', 'switch_mpt'], as_index=False)\
